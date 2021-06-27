@@ -1,0 +1,452 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    /* * {
+        border: 1px red solid;
+    } */
+    html {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 99%;
+    }
+    body {
+        background-color: black;
+    }
+    .columns {
+        display: flex;
+        justify-content: center;
+    }
+    .column {
+        text-align: center;
+    }
+    p {
+        color: white;
+        margin: 1vw;
+        font-size: 25vw; 
+        display: none;
+    }
+    h1 {
+        color: white;
+        font-size: 6vw;
+        margin: 1vw;
+        text-align: center;
+    }
+    h2 {
+        color: white;
+        font-size: 3vw;
+        margin: .5vw;
+        text-align: center;
+    }
+    h3 {
+        color: white;
+        font-size: 2vw;
+        margin: .5vw;
+        text-align: center;
+    }
+    h4 {
+        color: white;
+        font-size: 1.5vw;
+        margin: 1vw;
+        text-align: center;
+    }
+    #timeUp {
+        text-align: center;
+        display: none;
+        margin-top: 2vw;
+        font-size: 6vw;
+    }
+    .timeOutBig {
+        transition: .9s ease-in-out;
+        color: red;
+    }
+    input {
+        height: 4vw;
+        font-size: 2.5vw;
+        text-align: center;
+    }
+    input:focus {
+        background: yellow;
+    }
+</style>
+</head>
+<body>
+    <div class="columns">
+        <div class="column hourColumn">
+            <input type="number" id="hourInput">
+            <p id="hours"></p>
+            <h1>Hours</h1>
+        </div>
+        <div class="column hourColumn">
+            <p class="hourHeading">:</p>
+        </div>
+        <div class="column minColumn">
+            <input type="number" id="minInput">
+            <p id="mins"></p>
+            <h1>Minutes</h1>
+        </div>
+        <div class="column minColumn">
+            <p>:</p>
+        </div>
+        <div class="column secColumn">
+            <input type="number" id="secInput">
+            <p id="secs"></p>
+            <h1 id="secText">Seconds</h1>
+        </div>
+    </div>
+    <div class="columns">
+        <h2 class="info">Press enter to start clock</h2>
+        <h1 id="timeUp"></h1>
+    </div>
+    <div class="columns">
+        <h2 class="info">Press escape to stop clock</h2>
+    </div>
+    <div class="columns">
+        <h2 class="info">Use up/down arrow keys to add/subtract seconds</h2>
+    </div>
+    <div class="columns">
+        <h2 class="info">Use pageup/pagedown to add/subtract minutes</h2>
+    </div>
+    <div class="columns">
+        <h2 class="info">Press space bar to turn on/off Q&A/Wrap up alerts</h2>
+    </div>
+    <div class="columns">
+        <h2 class="info">Alerts Are Currently Turned: <span id="alertsInfo">On</span></h2>
+    </div>
+    <div class="columns">
+        <h3 class="info">Q&A Alert is for less than 5 minutes remaining, Wrap Up alert is for less than 1 minute remaining</h3>
+    </div>
+    <div class="columns">
+        <h4 class="info">Program written by Chris Paschall</h4>
+    </div>
+<script>
+    const hoursOutput = document.querySelector('#hours');
+    const minsOutput = document.querySelector('#mins');
+    const secsOutput = document.querySelector('#secs');
+
+    const hourInput = document.querySelector('#hourInput');
+    const minInput = document.querySelector('#minInput');
+    const secInput = document.querySelector('#secInput');
+
+    const alertsInfo = document.querySelector('#alertsInfo');
+
+    const clock = document.querySelectorAll('p');
+    const info = document.querySelectorAll('.info');
+    const fields = document.querySelectorAll('input');
+
+    const timeUp = document.querySelector('#timeUp');
+    const secText = document.querySelector('#secText');
+
+    const hourColumn = document.querySelectorAll('.hourColumn');
+    const minColumn = document.querySelectorAll('.minColumn');
+    const secColumn = document.querySelectorAll('.secColumn');
+
+    let hoursSelect;
+    let minsSelect;
+    let secsSelect;
+
+    let alerts = false;
+
+    let timer;
+    let pulsing;
+
+    function format() { // Makes sure minutes and seconds less than 10 in value have a '0' before the number
+        hoursOutput.innerHTML = hoursSelect;
+        (secsSelect < 10) ? secsOutput.innerHTML = `0${secsSelect}` : secsOutput.innerHTML = secsSelect;
+        (minsSelect < 10) ? minsOutput.innerHTML = `0${minsSelect}` : minsOutput.innerHTML = minsSelect;
+    }
+
+    format(); 
+
+    function flash() { // Flashes 'Time Is Up' on red and white and is started with setInterval in timeOut function
+        secsOutput.classList.add('timeOutBig');
+        secsOutput.addEventListener('transitionend', () => {
+            secsOutput.classList.remove('timeOutBig');
+        })
+    }
+    
+    function timeOut() { // Started when clock reaches 0
+        hoursSelect === 0;
+        minsSelect === 0;
+        secText.innerHTML = '';
+        secsSelect = 'Time Is Up';
+        timer = clearInterval(timer);
+        pulsing = setInterval(flash, 1000);
+    }
+
+    function zeroed(zero) { // Evaluates hours, minutes, seconds based on specific conditions and returns true or false
+        switch(zero) {
+            case 'H0':
+                return (hoursSelect === 0) ? true : false;
+                break;
+            case 'H0M0S0':
+                return (secsSelect === 0 && minsSelect === 0 && hoursSelect === 0) ? true : false;
+                break;
+            case 'H0M0S0TU':
+                return (secsSelect === 0 && minsSelect === 0 && hoursSelect === 0 || secsSelect === 'Time Is Up') ? true : false;
+                break;
+            case 'H+M0S0':
+                return (secsSelect === 0 && minsSelect === 0 && hoursSelect > 0) ? true : false;
+                break;
+            case 'H0M5+':
+                return (hoursSelect === 0 && minsSelect < 5) ? true : false;
+                break;
+            case 'H0M5+S0':
+                return (hoursSelect === 0 && minsSelect >= 5 && secsSelect >= 0) ? true : false;
+                break;
+            case 'H0M0':
+                return (hoursSelect === 0 && minsSelect === 0) ? true : false;
+                break;
+            case 'H0':
+                return (hoursSelect === 0) ? true : false;
+                break;
+            case 'M59+':
+                return (minsSelect > 59) ? true : false;
+                break;
+            case 'M0S0':
+                return (secsSelect === 0 && minsSelect === 0) ? true : false;
+                break;
+            case 'M+S0':
+                return (secsSelect === 0 && minsSelect > 0) ? true : false;
+                break;
+            case 'M0+':
+                return (minsSelect <= 0) ? true : false;
+                break;
+            case 'S59+':
+                return (secsSelect >= 59) ? true : false;
+                break;
+        }
+    }
+
+    function reset(value) { // Used to reset or iterate hours, minutes, seconds according to specific conditions
+        switch(value) {
+            case 'H-MrSr':
+                hoursSelect -= 1;
+                minsSelect = 59;
+                secsSelect = 59;
+                break;
+            case 'MrSr':
+                minsSelect = 59;
+                secsSelect = 59;
+                break;
+            case 'M-Sr':
+                minsSelect -= 1;
+                secsSelect = 59;
+                break;
+            case 'S-':
+                secsSelect -= 1;
+                break;
+        }
+    }
+
+    function invisible(invisibility) { // Make hours, minutes, seconds display to none
+        const invisible = invisibility.forEach(invisible => invisible.style.display = 'none');
+        return invisible;
+    }
+
+    function visible(visibility) { // Make hours, minutes, seconds display to block
+        const visible = visibility.forEach(visible => visible.style.display = 'block');
+        return visible;
+    }
+
+    function scaling(scale) { // Scale text when hours, minutes, seconds display is set to none or block
+        switch(scale) {
+            case 'HMS':
+                clock.forEach(clock => clock.style.fontSize = '22vw');
+                break;
+            case 'MS':
+                clock.forEach(clock => clock.style.fontSize = '30vw');
+                break;
+            case 'S':
+                (secsSelect === 'Time Is Up') ? clock.forEach(clock => clock.style.fontSize = '22vw') :
+                    clock.forEach(clock => clock.style.fontSize = '32vw');
+                break;
+        }
+    }
+
+    function decrement() { // setInterval inside start function iterates this function every second
+        (zeroed('H0M0S0')) ? timeOut() :
+        (zeroed('H+M0S0')) ? reset('H-MrSr') :
+        (zeroed('M0S0')) ? reset('MrSr') :
+        (zeroed('M+S0')) ? reset('M-Sr') :
+        reset('S-');
+
+        format();
+
+        if (zeroed('H0')) {
+            invisible(hourColumn);
+            scaling('MS');
+        }
+        
+        if (zeroed('H0M5+') && !alerts) {
+            timeUp.style.display = 'block';
+            timeUp.innerHTML = 'Q&A / Wrap Up';
+            timeUp.style.color = 'yellow';
+        } else {
+            timeUp.style.display = 'none';
+        }
+        if (zeroed('H0M0')) {
+            if (secsSelect === 'Time Is Up') {
+                timeUp.innerHTML = ''
+            } else {
+                timeUp.innerHTML = 'Wrap Up'
+                timeUp.style.color = 'red';
+            }
+            invisible(minColumn);
+            scaling('S');
+        }
+    }
+
+    function start() { // Started when time is set and enter is pressed
+        if (hourInput.value === '' && minInput.value === '' && secInput.value === '') {
+            alert('Enter A Time Before Pressing Enter')
+            return;
+        }
+        if (hourInput.value < 0 || minInput.value < 0 || secInput.value < 0) {
+            alert('Time Entered Cannot Be A Negative Number')
+            hourInput.value = '';
+            minInput.value = '';
+            secInput.value = '';
+            return;
+        }
+        hoursOutput.innerHTML = hourInput.value;
+        minsOutput.innerHTML = minInput.value;
+        secsOutput.innerHTML = secInput.value;
+        hoursSelect = Number(hourInput.value);
+        minsSelect = Number(minInput.value);
+        secsSelect = Number(secInput.value);
+        if (zeroed('H0')) {
+            invisible(hourColumn);
+            scaling('MS');
+        }
+        if (zeroed('H0M0')) {
+            invisible(minColumn);
+            scaling('S')
+        }
+        format();
+        invisible(fields);
+        visible(clock);
+        invisible(info);
+        timeUp.style.display = 'none';
+        timer = setInterval(decrement, 1000);
+    }
+
+    function reload() { // Started when escape key is pressed to return to menu
+        timer = clearInterval(timer);
+        pulsing = clearInterval(pulsing);
+        timeUp.style.display = 'none';
+        timeUp.innerHTML = '';
+        secsOutput.classList.remove('timeOutBig');
+        secText.innerHTML = 'Seconds';
+        visible(hourColumn);
+        visible(minColumn);
+        visible(secColumn);
+        visible(fields);
+        visible(info);
+        scaling('HMS');
+        invisible(clock);
+    }
+
+    document.addEventListener('keydown', (e) => { // Monitors key presses and takes appropriate actions
+        switch (e.keyCode) {
+            case 27: // Escape Key
+                console.log('Escape Key Pressed Returning To Clock Setup');	
+                reload();
+                break;
+            case 13: // Enter Key
+                if (typeof timer != 'number') {
+                    console.log('Enter Key Pressed Starting Clock');	
+                    start()
+                    return;
+                }
+                console.log('Enter Key Pressed But Has No Effect')
+                break;
+            case 38: // Up Arrow Key
+                if (zeroed('H0M0S0TU')) {
+                    console.log('Up Key Pressed But Cannot Increment')
+                    return;
+                }
+                console.log('Up Key Pressed Incrementing Seconds');	
+                if (zeroed('M59+')) {
+                    visible(hourColumn);
+                    scaling('HMS');
+                    hoursSelect += 1;
+                    minsSelect = 0;
+                    secsSelect = 0;
+                } else if (zeroed('S59+')) {
+                    visible(minColumn);
+                    scaling('MS');
+                    minsSelect += 1;
+                    secsSelect = 0;
+                } else {
+                    secsSelect += 2;
+                    decrement();
+                }
+                break;
+            case 40: // Down Arrow Key
+                if (zeroed('H0M0S0TU')) {
+                    console.log('Down Key Pressed But Cannot Decrement')
+                    return;
+                }
+                console.log('Down Key Pressed Decrementing Seconds');
+                decrement();
+                break;
+            case 33: // Page Up Key
+                if (zeroed('H0M0S0TU')) {
+                    break;
+                }
+                if (zeroed('H0M0')) {
+                    visible(minColumn);
+                    scaling('MS');
+                    minsSelect += 1;
+                } else if (minsSelect >= 59) {
+                    visible(hourColumn);
+                    scaling('HMS');
+                    hoursSelect += 1;
+                    minsSelect = 0;
+                } else if (zeroed('H0M0')) {
+                    visible(minColumn);
+                    scaling('MS');
+                } else {
+                    minsSelect += 1;
+                }
+                secsSelect += 1
+                decrement();
+                break;
+            case 34: // Page Up Down
+                if (zeroed('H0M0S0TU')) {
+                    break;
+                }
+                if (zeroed('H0M0')) {
+                    break;
+                } else if (zeroed('M0+')) {
+                    hoursSelect -= 1;
+                    minsSelect = 59;
+                } else {
+                    minsSelect -= 1;
+                }
+                secsSelect += 1
+                decrement();
+                break;
+            case 32: // Space Bar Key
+                !alerts;
+                console.log(`Alerts are ${alerts ? 'On' : 'Off'}`);
+                alerts ? alertsInfo.innerHTML = 'On' : alertsInfo.innerHTML = 'Off';
+                if (zeroed('H0M5+S0')) {
+                    break;
+                } else if (timeUp.style.display === 'block' && zeroed('H0M5+') && alerts) {
+                    timeUp.style.display = 'none';
+                    alerts = false; 
+                } else if (fields) {
+                    alerts = !alerts;
+                } else {
+                    timeUp.style.display = 'block';
+                    alerts = !alerts;       
+                }
+        }
+    });
+</script>
+</body>
+</html>
