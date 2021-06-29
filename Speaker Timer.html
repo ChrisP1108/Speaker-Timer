@@ -148,6 +148,7 @@
     let secsSelect;
 
     let alerts = false;
+    let alertToggle;
 
     let timer;
     let pulsing;
@@ -266,6 +267,26 @@
         }
     }
 
+    function alertMessage() { // Turns on Alerts When Remaining time is less than 5 minutes and off when greater than 5 if toggled 
+        if (zeroed('H0M5+') && alerts) {
+            timeUp.style.display = 'block';
+            timeUp.innerHTML = 'Q&A / Wrap Up';
+            timeUp.style.color = 'yellow';
+        } else {
+            timeUp.style.display = 'none';
+        }
+        if (zeroed('H0M0')) {
+            if (secsSelect === 'Time Is Up') {
+                timeUp.innerHTML = '';
+            } else {
+                timeUp.innerHTML = 'Wrap Up'
+                timeUp.style.color = 'red';
+            }
+            invisible(minColumn);
+            scaling('S');
+        }
+    }
+
     function decrement() { // setInterval inside start function iterates this function every second
         (zeroed('H0M0S0')) ? timeOut() :
         (zeroed('H+M0S0')) ? reset('H-MrSr') :
@@ -279,24 +300,7 @@
             invisible(hourColumn);
             scaling('MS');
         }
-        
-        if (zeroed('H0M5+') && !alerts) {
-            timeUp.style.display = 'block';
-            timeUp.innerHTML = 'Q&A / Wrap Up';
-            timeUp.style.color = 'yellow';
-        } else {
-            timeUp.style.display = 'none';
-        }
-        if (zeroed('H0M0')) {
-            if (secsSelect === 'Time Is Up') {
-                timeUp.innerHTML = ''
-            } else {
-                timeUp.innerHTML = 'Wrap Up'
-                timeUp.style.color = 'red';
-            }
-            invisible(minColumn);
-            scaling('S');
-        }
+        alertMessage();
     }
 
     function start() { // Started when time is set and enter is pressed
@@ -357,8 +361,9 @@
                 break;
             case 13: // Enter Key
                 if (typeof timer != 'number') {
-                    console.log('Enter Key Pressed Starting Clock');	
-                    start()
+                    console.log('Enter Key Pressed Starting Clock');
+                    start();
+                    alertMessage();	
                     return;
                 }
                 console.log('Enter Key Pressed But Has No Effect')
@@ -431,20 +436,12 @@
                 decrement();
                 break;
             case 32: // Space Bar Key
+                alerts = !alerts;
                 !alerts;
-                console.log(`Alerts are ${alerts ? 'On' : 'Off'}`);
-                alerts ? alertsInfo.innerHTML = 'On' : alertsInfo.innerHTML = 'Off';
-                if (zeroed('H0M5+S0')) {
-                    break;
-                } else if (timeUp.style.display === 'block' && zeroed('H0M5+') && alerts) {
-                    timeUp.style.display = 'none';
-                    alerts = false; 
-                } else if (fields) {
-                    alerts = !alerts;
-                } else {
-                    timeUp.style.display = 'block';
-                    alerts = !alerts;       
-                }
+                alertMessage();
+                alertToggle = alerts ? 'On' : 'Off';
+                console.log(`Alerts are ${alertToggle}`);
+                alertsInfo.innerHTML = alertToggle;
         }
     });
 </script>
