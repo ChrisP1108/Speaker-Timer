@@ -147,7 +147,7 @@
     let minsSelect;
     let secsSelect;
 
-    let alerts = false;
+    let alerts = true;
     let alertToggle;
 
     let timer;
@@ -206,6 +206,9 @@
             case 'M59+':
                 return (minsSelect > 59) ? true : false;
                 break;
+            case 'M59':
+                return (minsSelect >= 59) ? true : false;
+                break;
             case 'M0S0':
                 return (secsSelect === 0 && minsSelect === 0) ? true : false;
                 break;
@@ -252,6 +255,8 @@
         return visible;
     }
 
+    visible(fields);
+
     function scaling(scale) { // Scale text when hours, minutes, seconds display is set to none or block
         switch(scale) {
             case 'HMS':
@@ -268,8 +273,8 @@
     }
 
     function alertMessage() { // Turns on Alerts When Remaining time is less than 5 minutes and off when greater than 5 if toggled 
-        if (zeroed('H0M5+') && alerts) {
-            timeUp.style.display = 'block';
+        if (zeroed('H0M5+') && alerts && fields[2].style.display === 'none') {
+            timeUp.style.display  = 'block';
             timeUp.innerHTML = 'Q&A / Wrap Up';
             timeUp.style.color = 'yellow';
         } else {
@@ -305,11 +310,18 @@
 
     function start() { // Started when time is set and enter is pressed
         if (hourInput.value === '' && minInput.value === '' && secInput.value === '') {
-            alert('Enter A Time Before Pressing Enter')
+            alert('Enter A Time Before Pressing Enter');
             return;
         }
         if (hourInput.value < 0 || minInput.value < 0 || secInput.value < 0) {
-            alert('Time Entered Cannot Be A Negative Number')
+            alert('Time Entered Cannot Be A Negative Number');
+            hourInput.value = '';
+            minInput.value = '';
+            secInput.value = '';
+            return;
+        }
+        if (minInput.value > 59 || secInput.value > 59) {
+            alert('Minutes And/Or Seconds Cannot Be Greater Than 59');
             hourInput.value = '';
             minInput.value = '';
             secInput.value = '';
@@ -406,7 +418,7 @@
                     visible(minColumn);
                     scaling('MS');
                     minsSelect += 1;
-                } else if (minsSelect >= 59) {
+                } else if (zeroed('M59')) {
                     visible(hourColumn);
                     scaling('HMS');
                     hoursSelect += 1;
@@ -437,11 +449,10 @@
                 break;
             case 32: // Space Bar Key
                 alerts = !alerts;
-                !alerts;
-                alertMessage();
                 alertToggle = alerts ? 'On' : 'Off';
                 console.log(`Alerts are ${alertToggle}`);
                 alertsInfo.innerHTML = alertToggle;
+                alertMessage();
         }
     });
 </script>
