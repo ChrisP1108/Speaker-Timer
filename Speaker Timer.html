@@ -322,9 +322,8 @@
         }
         if (minInput.value > 59 || secInput.value > 59) {
             alert('Minutes And/Or Seconds Cannot Be Greater Than 59');
-            hourInput.value = '';
-            minInput.value = '';
-            secInput.value = '';
+            (minInput.value > 59) ? minInput.value = '' : minInput.value;
+            (secInput.value > 59) ? secInput.value = '' : secInput.value;
             return;
         }
         hoursOutput.innerHTML = hourInput.value;
