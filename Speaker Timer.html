@@ -266,8 +266,8 @@
                 clock.forEach(clock => clock.style.fontSize = '30vw');
                 break;
             case 'S':
-                // (secsSelect === 'Time Is Up') ? clock.forEach(clock => clock.style.fontSize = '22vw') :
-                //     clock.forEach(clock => clock.style.fontSize = '32vw');
+                (secsSelect === 'Time Is Up') ? clock.forEach(clock => clock.style.fontSize = '22vw') :
+                    clock.forEach(clock => clock.style.fontSize = '32vw');
                 break;
         }
     }
@@ -287,7 +287,7 @@
                 timeUp.innerHTML = 'Wrap Up'
                 timeUp.style.color = 'red';
             }
-            // invisible(minColumn);
+            invisible(minColumn);
             scaling('S');
         }
     }
